@@ -6,9 +6,7 @@ regarding copyright ownership.  The ASF licenses this file
 to you under the Apache License, Version 2.0 (the
 "License"; you may not use this file except in compliance
 with the License.  You may obtain a copy of the License at
-
   http://www.apache.org/licenses/LICENSE-2.0
-
 Unless required by applicable law or agreed to in writing,
 software distributed under the License is distributed on an
 "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -95,28 +93,28 @@ namespace ETP_NS
 		/**
 		* Does nothing since the ETP session must already be opened.
 		*/
-		void open() final {}
+		void open() {}
 
 		/**
 		* It is opened if the ETP session is opened
 		*/
-		bool isOpened() const final { return session_ != nullptr && !session_->isWebSocketSessionClosed();  }
+		bool isOpened() const { return session_ != nullptr && !session_->isWebSocketSessionClosed(); }
 
 		/**
 		* Does nothing since the ETP session can be used for other purpose.
 		*/
-		void close() final {}
+		void close() {}
 
 		/*
 		* Get the used (native) datatype in a dataset
 		*/
-		COMMON_NS::AbstractObject::numericalDatatypeEnum getNumericalDatatype(const std::string & groupName) final;
+		COMMON_NS::AbstractObject::hdfDatatypeEnum getHdfDatatypeInDataset(const std::string & groupName);
 
 		/**
 		* Get the used datatype class in a dataset
 		* To compare with H5T_INTEGER, H5T_FLOAT , H5T_STRING , etc...
 		*/
-		int getHdfDatatypeClassInDataset(const std::string & datasetName) final;
+		int getHdfDatatypeClassInDataset(const std::string & datasetName);
 
 		/**
 		* Write an itemized list of list into the HDF file by means of a single group containing 2 datasets.
@@ -132,24 +130,108 @@ namespace ETP_NS
 		*/
 		void writeItemizedListOfList(const std::string & groupName,
 			const std::string & name,
-			COMMON_NS::AbstractObject::numericalDatatypeEnum cumulativeLengthDatatype,
+			hdf5_hid_t cumulativeLengthDatatype,
 			const void * cumulativeLength,
 			unsigned long long cumulativeLengthSize,
-			COMMON_NS::AbstractObject::numericalDatatypeEnum elementsDatatype,
+			hdf5_hid_t elementsDatatype,
 			const void * elements,
-			unsigned long long elementsSize) final;
+			unsigned long long elementsSize);
+
+		/**
+		* Get the number of dimensions in an HDF dataset of the proxy.
+		* @param datasetName	The absolute name of the dataset we want to get the number of dimensions.
+		*/
+		unsigned int getDimensionCount(const std::string & datasetName);
 
 		/**
 		 * Get the number of elements in each dimension in an HDF dataset of the proxy.
 		 * @param datasetName	The absolute name of the dataset we want to get the number of elements.
 		 */
-		std::vector<unsigned long long> getElementCountPerDimension(const std::string & datasetName) final;
+		std::vector<unsigned long long> getElementCountPerDimension(const std::string & datasetName);
+
+		/**
+		* Get the number of elements in an HDF dataset of the proxy. The number of elements is get from all dimensions.
+		* @param datasetName	The absolute name of the dataset we want to get the number of elements.
+		*/
+		signed long long getElementCount(const std::string & datasetName);
 
 		/**
 		* Set the new compression level which will be used for all data to be written
 		* @param compressionLevel				Lower compression levels are faster but result in less compression. Range [0..9] is allowed.
 		*/
-		void setCompressionLevel(unsigned int newCompressionLevel) final { if (newCompressionLevel > 9) compressionLevel = 9; else compressionLevel = newCompressionLevel; }
+		void setCompressionLevel(unsigned int newCompressionLevel) { if (newCompressionLevel > 9) compressionLevel = 9; else compressionLevel = newCompressionLevel; }
+
+		void writeArrayNdOfFloatValues(const std::string & groupName,
+			const std::string & name,
+			const float * floatValues,
+			const unsigned long long * numValuesInEachDimension,
+			unsigned int numDimensions);
+
+		/**
+		* Write an array (potentially with multi dimensions) of double values into the HDF file by means of a single dataset.
+		* @param groupName						The name of the group where to create the array of double values.
+		*										This name must not contain '/' character and must be directly contained in RESQML group.
+		* @param name							The name of the array of double values hdf dataset. It must not already exist.
+		* @param dblValues						1d array of double values ordered firstly by fastest direction.
+		* @param numValuesInEachDimension		Number of values in each dimension of the array to write. They are ordered from fastest index to slowest index.
+		* @param numDimensions					The number of the dimensions of the array to write
+		*/
+		void writeArrayNdOfDoubleValues(const std::string & groupName,
+			const std::string & name,
+			const double * dblValues,
+			const unsigned long long * numValuesInEachDimension,
+			unsigned int numDimensions);
+
+		/**
+		* Write an array (potentially with multi dimensions) of char values into the HDF file by means of a single dataset.
+		* @param groupName						The name of the group where to create the array of int values.
+		*										This name must not contain '/' character and must be directly contained in RESQML group.
+		* @param name							The name of the array of int values hdf dataset. It must not already exist.
+		* @param intValues						1d array of char values ordered firstly by fastest direction.
+		* @param numValuesInEachDimension		Number of values in each dimension of the array to write. They are ordered from fastest index to slowest index.
+		* @param numDimensions					The number of the dimensions of the array to write
+		*/
+		void writeArrayNdOfCharValues(const std::string & groupName,
+			const std::string & name,
+			const char * intValues,
+			const unsigned long long * numValuesInEachDimension,
+			unsigned int numDimensions);
+
+		/**
+		* Write an array (potentially with multi dimensions) of int values into the HDF file by means of a single dataset.
+		* @param groupName						The name of the group where to create the array of int values.
+		*										This name must not contain '/' character and must be directly contained in RESQML group.
+		* @param name							The name of the array of int values hdf dataset. It must not already exist.
+		* @param intValues						1d array of int values ordered firstly by fastest direction.
+		* @param numValuesInEachDimension		Number of values in each dimension of the array to write. They are ordered from fastest index to slowest index.
+		* @param numDimensions					The number of the dimensions of the array to write
+		*/
+		void writeArrayNdOfIntValues(const std::string & groupName,
+			const std::string & name,
+			const int * intValues,
+			const unsigned long long * numValuesInEachDimension,
+			unsigned int numDimensions);
+
+		void writeArrayNdOfInt64Values(const std::string & groupName,
+			const std::string & name,
+			const int64_t * values,
+			const unsigned long long * numValuesInEachDimension,
+			unsigned int numDimensions);
+
+		/**
+		* Write an array (potentially with multi dimensions) of gSoap unsigned long 64 values into the HDF file by means of a single dataset.
+		* @param groupName						The name of the group where to create the array of int values.
+		*										This name must not contain '/' character and must be directly contained in RESQML group.
+		* @param name							The name of the array of gSoap unsigned long 64 values hdf dataset. It must not already exist.
+		* @param uint64_tValues					1d array of gSoap unsigned long 64 values ordered firstly by fastest direction.
+		* @param numValuesInEachDimension		Number of values in each dimension of the array to write. They are ordered from fastest index to slowest index.
+		* @param numDimensions					The number of the dimensions of the array to write
+		*/
+		void writeArrayNdOfUInt64Values(const std::string & groupName,
+			const std::string & name,
+			const uint64_t * values,
+			const unsigned long long * numValuesInEachDimension,
+			unsigned int numDimensions);
 
 		/**
 		* Write an array (potentially with multi dimensions) of a specific datatype into the HDF file by means of a single dataset.
@@ -163,10 +245,10 @@ namespace ETP_NS
 		*/
 		void writeArrayNd(const std::string & groupName,
 			const std::string & name,
-			COMMON_NS::AbstractObject::numericalDatatypeEnum datatype,
+			hdf5_hid_t datatype,
 			const void * values,
 			const unsigned long long * numValuesInEachDimension,
-			unsigned int numDimensions) final;
+			unsigned int numDimensions);
 
 		/**
 		* Create an array (potentially with multi dimensions) of a specific datatype into the HDF file. Values are not yet written to this array.
@@ -180,9 +262,10 @@ namespace ETP_NS
 		void createArrayNd(
 			const std::string& groupName,
 			const std::string& name,
-			COMMON_NS::AbstractObject::numericalDatatypeEnum datatype,
+			hdf5_hid_t datatype,
 			const unsigned long long* numValuesInEachDimension,
-			unsigned int numDimensions) final;
+			unsigned int numDimensions
+		);
 
 		/**
 		* Find the array associated with @p groupName and @p name and write to it.
@@ -197,11 +280,12 @@ namespace ETP_NS
 		void writeArrayNdSlab(
 			const std::string& groupName,
 			const std::string& name,
-			COMMON_NS::AbstractObject::numericalDatatypeEnum datatype,
+			hdf5_hid_t datatype,
 			const void* values,
 			const unsigned long long* numValuesInEachDimension,
 			const unsigned long long* offsetValuesInEachDimension,
-			unsigned int numDimensions) final;
+			unsigned int numDimensions
+		);
 
 		/**
 		* Write some string attributes into a group
@@ -300,7 +384,7 @@ namespace ETP_NS
 		* @param datasetName	The absolute dataset name where to read the values
 		* @param values 		The values must be pre-allocated.
 		*/
-		void readArrayNdOfDoubleValues(const std::string & datasetName, double* values) final { readArrayNdOfValues(datasetName, values); }
+		void readArrayNdOfDoubleValues(const std::string & datasetName, double* values) { readArrayNdOfValues(datasetName, values); }
 
 		/**
 		 * Find the array associated with @p datasetName and read from it.
@@ -315,7 +399,8 @@ namespace ETP_NS
 			double* values,
 			unsigned long long const * numValuesInEachDimension,
 			unsigned long long const * offsetInEachDimension,
-			unsigned int numDimensions) final;
+			unsigned int numDimensions
+		);
 
 		/**
 		* Find the array associated with @p datasetName and read from it.
@@ -333,7 +418,7 @@ namespace ETP_NS
 			unsigned long long const * offsetInEachDimension,
 			unsigned long long const * strideInEachDimension,
 			unsigned long long const * blockSizeInEachDimension,
-			unsigned int numDimensions) final;
+			unsigned int numDimensions);
 
 		void selectArrayNdOfValues(
 			const std::string & datasetName,
@@ -344,7 +429,7 @@ namespace ETP_NS
 			unsigned int numDimensions,
 			bool newSelection,
 			hdf5_hid_t & dataset,
-			hdf5_hid_t & filespace) final;
+			hdf5_hid_t & filespace);
 
 		/**
 		* Considering a given dataset, read the double values corresponding to an existing selected region.
@@ -357,14 +442,14 @@ namespace ETP_NS
 			hdf5_hid_t dataset,
 			hdf5_hid_t filespace,
 			void* values,
-			unsigned long long slabSize) final;
+			unsigned long long slabSize);
 
 		/**
 		* Read an array Nd of float values stored in a specific dataset.
 		* @param datasetName	The absolute dataset name where to read the values
 		* @param values 		The values must be pre-allocated.
 		*/
-		void readArrayNdOfFloatValues(const std::string & datasetName, float* values) final { readArrayNdOfValues(datasetName, values); }
+		void readArrayNdOfFloatValues(const std::string & datasetName, float* values) { readArrayNdOfValues(datasetName, values); }
 
 		/**
 		* Find the array associated with @p datasetName and read from it.
@@ -379,14 +464,15 @@ namespace ETP_NS
 			float* values,
 			unsigned long long const * numValuesInEachDimension,
 			unsigned long long const * offsetInEachDimension,
-			unsigned int numDimensions) final;
+			unsigned int numDimensions
+		);
 
 		/**
 		* Read an array Nd of long values stored in a specific dataset.
 		* @param datasetName	The absolute dataset name where to read the values
 		* @param values 		The values must be pre-allocated.
 		*/
-		void readArrayNdOfInt64Values(const std::string & datasetName, int64_t* values) final { readArrayNdOfValues(datasetName, values); }
+		void readArrayNdOfInt64Values(const std::string & datasetName, int64_t* values) { readArrayNdOfValues(datasetName, values); }
 
 		/**
 		* Find the array associated with datasetName and read from it.
@@ -401,21 +487,22 @@ namespace ETP_NS
 			int64_t* values,
 			unsigned long long const * numValuesInEachDimension,
 			unsigned long long const * offsetInEachDimension,
-			unsigned int numDimensions)  final;
+			unsigned int numDimensions
+		);
 
 		/**
 		* Read an array Nd of unsigned long values stored in a specific dataset.
 		* @param datasetName	The absolute dataset name where to read the values
 		* @param values 		The values must be pre-allocated.
 		*/
-		void readArrayNdOfUInt64Values(const std::string & datasetName, uint64_t* values) final { readArrayNdOfValues(datasetName, values); }
+		void readArrayNdOfUInt64Values(const std::string & datasetName, uint64_t* values) { readArrayNdOfValues(datasetName, values); }
 
 		/**
 		* Read an array Nd of int values stored in a specific dataset.
 		* @param datasetName	The absolute dataset name where to read the values
 		* @param values 		The values must be pre-allocated.
 		*/
-		void readArrayNdOfIntValues(const std::string & datasetName, int* values) final { readArrayNdOfValues(datasetName, values); }
+		void readArrayNdOfIntValues(const std::string & datasetName, int* values) { readArrayNdOfValues(datasetName, values); }
 
 		/**
 		* Find the array associated with datasetName and read from it.
@@ -431,14 +518,14 @@ namespace ETP_NS
 			unsigned long long const * numValuesInEachDimension,
 			unsigned long long const * offsetInEachDimension,
 			unsigned int numDimensions
-		) final;
+		);
 
 		/**
 		* Read an array Nd of unsigned int values stored in a specific dataset
 		* Don"t forget to delete the allocated pointer when no more necessary.
 		* @param datasetName	The absolute dataset name where to read the values
 		*/
-		void readArrayNdOfUIntValues(const std::string & datasetName, unsigned int* values) final { readArrayNdOfValues(datasetName, values); }
+		void readArrayNdOfUIntValues(const std::string & datasetName, unsigned int* values) { readArrayNdOfValues(datasetName, values); }
 
 		/**
 		* Read an array Nd of short values stored in a specific dataset
@@ -446,44 +533,50 @@ namespace ETP_NS
 		* @param datasetName	The absolute dataset name where to read the values
 		* @param values 		The values must be pre-allocated.
 		*/
-		void readArrayNdOfShortValues(const std::string & datasetName, short* values) final { readArrayNdOfValues(datasetName, values); }
+		void readArrayNdOfShortValues(const std::string & datasetName, short* values) { readArrayNdOfValues(datasetName, values); }
 
 		/**
 		* Read an array Nd of unsigned short values stored in a specific dataset.
 		* @param datasetName	The absolute dataset name where to read the values
 		* @param values 		The values must be pre-allocated.
 		*/
-		void readArrayNdOfUShortValues(const std::string & datasetName, unsigned short* values) final { readArrayNdOfValues(datasetName, values); }
+		void readArrayNdOfUShortValues(const std::string & datasetName, unsigned short* values) { readArrayNdOfValues(datasetName, values); }
 
 		/**
 		* Read an array Nd of char values stored in a specific dataset.
 		* @param datasetName	The absolute dataset name where to read the values
 		* @param values 		The values must be pre-allocated.
 		*/
-		void readArrayNdOfCharValues(const std::string & datasetName, char* values) final { readArrayNdOfValues(datasetName, values); }
+		void readArrayNdOfCharValues(const std::string & datasetName, char* values) { readArrayNdOfValues(datasetName, values); }
 
 		/**
 		* Read an array Nd of unsigned char values stored in a specific dataset.
 		* @param datasetName	The absolute dataset name where to read the values
 		*/
-		void readArrayNdOfUCharValues(const std::string & datasetName, unsigned char* values) final { readArrayNdOfValues(datasetName, values); }
+		void readArrayNdOfUCharValues(const std::string & datasetName, unsigned char* values) { readArrayNdOfValues(datasetName, values); }
+
+		/**
+		* Read the dimensions of an array stored in a specific dataset
+		* @param datasetName	The absolute dataset name where to read the array dimensions
+		*/
+		std::vector<unsigned long long> readArrayDimensions(const std::string & datasetName);
 
 		/**
 		* Check wether an absolute path exists in the hdf file or not.
 		*/
-		bool exist(const std::string & absolutePathInHdfFile) const final;
+		bool exist(const std::string & absolutePathInHdfFile) const;
 
 		/**
 		* Check wether a dataset is compressed or not.
 		*/
-		bool isCompressed(const std::string & datasetName) final;
-		
+		bool isCompressed(const std::string & datasetName);
+
 		/**
 		 * Get the number of elements in each chunk dimension of an HDF5 dataset.
 		 * If the dataset is not compressed, then it returns an empty vector.
 		 * @param datasetName	The absolute name of the dataset which we want to get the number of elements from.
 		 */
-		std::vector<unsigned long long> getElementCountPerChunkDimension(const std::string& ) final { return std::vector<unsigned long long>(); }
+		std::vector<unsigned long long> getElementCountPerChunkDimension(const std::string&) { return std::vector<unsigned long long>(); }
 
 		/**
 		* Get the standard XML namespace for serializing this data object.
@@ -586,7 +679,7 @@ namespace ETP_NS
 								currentCounts[dimIndex] = daMetadata.dimensions[dimIndex] - starts[dimIndex];
 							}
 
-							for (size_t dimIndex2 = dimIndex + 1; dimIndex2 < daMetadata.dimensions.size(); ++dimIndex2) {
+							for (int64_t dimIndex2 = dimIndex + 1; dimIndex2 < daMetadata.dimensions.size(); ++dimIndex2) {
 								starts[dimIndex2] = 0;
 								currentCounts[dimIndex2] = counts[dimIndex2];
 							}

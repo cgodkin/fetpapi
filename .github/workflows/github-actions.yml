@@ -66,11 +66,11 @@ jobs:
           cmake --build . --config Release --target INSTALL
       - name: FESAPI install
         run: |
-          git clone https://github.com/F2I-Consulting/fesapi.git ${{ runner.temp }}/fesapi-src
+          git clone --branch v2.3.0.0 https://github.com/F2I-Consulting/fesapi.git ${{ runner.temp }}/fesapi-src
           cd ${{ runner.temp }}
           mkdir fesapi-build
           cd fesapi-build
-          cmake -G"Visual Studio 16 2019" -A x64 -T host=x64 -Wno-dev -Wno-deprecated -DHDF5_ROOT=${{ runner.temp }}\hdf5-1.12.0-Std-win10_64-vs16 -DMINIZIP_INCLUDE_DIR=${{ runner.temp }}/minizip-install/include -DMINIZIP_LIBRARY_RELEASE=${{ runner.temp }}/minizip-install/lib/minizip.lib -DZLIB_INCLUDE_DIR=${{ runner.temp }}\hdf5-1.12.0-Std-win10_64-vs16/include -DZLIB_LIBRARY_RELEASE=${{ runner.temp }}\hdf5-1.12.0-Std-win10_64-vs16/lib/zlib.lib -DSZIP_LIBRARY_RELEASE=${{ runner.temp }}\hdf5-1.12.0-Std-win10_64-vs16/lib/szip.lib -DBoost_INCLUDE_DIR=${{ runner.temp }}\boost-install -DWITH_EXAMPLE=TRUE -DWITH_RESQML2_2=TRUE -DCMAKE_INSTALL_PREFIX=${{ runner.temp }}/fesapi-install ${{ runner.temp }}/fesapi-src
+          cmake -G"Visual Studio 16 2019" -A x64 -T host=x64 -Wno-dev -Wno-deprecated -DHDF5_BUILT_AS_DYNAMIC_LIB=TRUE -DHDF5_C_INCLUDE_DIR=${{ runner.temp }}\hdf5-1.12.0-Std-win10_64-vs16/include -DHDF5_C_LIBRARY_RELEASE=${{ runner.temp }}\hdf5-1.12.0-Std-win10_64-vs16/lib/hdf5.lib -DMINIZIP_INCLUDE_DIR=${{ runner.temp }}/minizip-install/include -DMINIZIP_LIBRARY_RELEASE=${{ runner.temp }}/minizip-install/lib/minizip.lib -DZLIB_INCLUDE_DIR=${{ runner.temp }}\hdf5-1.12.0-Std-win10_64-vs16/include -DZLIB_LIBRARY_RELEASE=${{ runner.temp }}\hdf5-1.12.0-Std-win10_64-vs16/lib/zlib.lib -DSZIP_LIBRARY_RELEASE=${{ runner.temp }}\hdf5-1.12.0-Std-win10_64-vs16/lib/szip.lib -DBoost_INCLUDE_DIR=${{ runner.temp }}\boost-install -DWITH_EXAMPLE=TRUE -DWITH_RESQML2_2=TRUE -DCMAKE_INSTALL_PREFIX=${{ runner.temp }}/fesapi-install ${{ runner.temp }}/fesapi-src
           cmake --build . --config Release -j2
           cmake --build . --config Release --target INSTALL
       - name: CMake build and install
@@ -78,7 +78,7 @@ jobs:
           cd ${{ github.workspace }}/..
           mkdir build
           cd build
-          cmake -G"Visual Studio 16 2019" -A x64 -T host=x64 -Wno-dev -Wno-deprecated -DBoost_INCLUDE_DIR=${{ runner.temp }}\boost-install -DAVRO_INCLUDE_DIR=${{ runner.temp }}/avro-cpp-1.10.2-install/include -DAVRO_LIBRARY_RELEASE=${{ runner.temp }}/avro-cpp-1.10.2-install/lib/avrocpp_s.lib -DWITH_FESAPI=TRUE -DFESAPI_INCLUDE_DIR=${{ runner.temp }}/fesapi-install/include -DFESAPI_LIBRARY_RELEASE=${{ runner.temp }}/fesapi-install/lib/FesapiCpp.2.4.0.0.lib ${{ github.workspace }}
+          cmake -G"Visual Studio 16 2019" -A x64 -T host=x64 -Wno-dev -Wno-deprecated -DBoost_INCLUDE_DIR=${{ runner.temp }}\boost-install -DAVRO_INCLUDE_DIR=${{ runner.temp }}/avro-cpp-1.10.2-install/include -DAVRO_LIBRARY_RELEASE=${{ runner.temp }}/avro-cpp-1.10.2-install/lib/avrocpp_s.lib -DWITH_FESAPI=TRUE -DFESAPI_INCLUDE_DIR=${{ runner.temp }}/fesapi-install/include -DFESAPI_LIBRARY_RELEASE=${{ runner.temp }}/fesapi-install/lib/FesapiCpp.2.3.0.0.lib ${{ github.workspace }}
           cmake --build . --config Release -j2
   ubuntu-20:
     runs-on: ubuntu-20.04
@@ -121,11 +121,11 @@ jobs:
           sudo apt install -y libhdf5-dev libminizip-dev libboost-all-dev
       - name: FESAPI install
         run: |
-          git clone https://github.com/F2I-Consulting/fesapi.git ${{ runner.temp }}/fesapi-src
+          git clone --branch v2.3.0.0 https://github.com/F2I-Consulting/fesapi.git ${{ runner.temp }}/fesapi-src
           cd ${{ runner.temp }}
           mkdir fesapi-build
           cd fesapi-build
-          cmake -DMINIZIP_INCLUDE_DIR=/usr/include/minizip -DMINIZIP_LIBRARY_RELEASE=/usr/lib/x86_64-linux-gnu/libminizip.so.1.0.0 -DCMAKE_BUILD_TYPE=Release -DWITH_JAVA_WRAPPING=TRUE -DCMAKE_INSTALL_PREFIX=${{ runner.temp }}/fesapi-install ${{ runner.temp }}/fesapi-src
+          cmake -DHDF5_C_INCLUDE_DIR=/usr/include/hdf5/serial -DHDF5_C_LIBRARY_RELEASE=/usr/lib/x86_64-linux-gnu/libhdf5_serial.so.103.0.0 -DMINIZIP_INCLUDE_DIR=/usr/include/minizip -DMINIZIP_LIBRARY_RELEASE=/usr/lib/x86_64-linux-gnu/libminizip.so.1.0.0 -DCMAKE_BUILD_TYPE=Release -DWITH_JAVA_WRAPPING=TRUE -DCMAKE_INSTALL_PREFIX=${{ runner.temp }}/fesapi-install ${{ runner.temp }}/fesapi-src
           cmake --build . -j2
           cmake --install .
       - name: AVRO INSTALL
@@ -145,5 +145,5 @@ jobs:
           cd ${{ github.workspace }}/..
           mkdir build
           cd build
-          cmake -DAVRO_INCLUDE_DIR=${{ runner.temp }}/avro-cpp-1.10.2-install/include -DAVRO_LIBRARY_RELEASE=${{ runner.temp }}/avro-cpp-1.10.2-install/lib/libavrocpp_s.a -DWITH_FESAPI=TRUE -DFESAPI_INCLUDE_DIR=${{ runner.temp }}/fesapi-install/include -DFESAPI_LIBRARY_RELEASE=${{ runner.temp }}/fesapi-install/lib/libFesapiCpp.so -DFESAPI_JAR=${{ runner.temp }}/fesapi-install/lib/fesapiJava-2.4.0.0.jar -DWITH_JAVA_WRAPPING=TRUE ${{ github.workspace }}
+          cmake -DAVRO_INCLUDE_DIR=${{ runner.temp }}/avro-cpp-1.10.2-install/include -DAVRO_LIBRARY_RELEASE=${{ runner.temp }}/avro-cpp-1.10.2-install/lib/libavrocpp_s.a -DWITH_FESAPI=TRUE -DFESAPI_INCLUDE_DIR=${{ runner.temp }}/fesapi-install/include -DFESAPI_LIBRARY_RELEASE=${{ runner.temp }}/fesapi-install/lib/libFesapiCpp.so -DFESAPI_JAR=${{ runner.temp }}/fesapi-install/lib/fesapiJava-2.3.0.0.jar -DWITH_JAVA_WRAPPING=TRUE ${{ github.workspace }}
           cmake --build . --config Release -j2
